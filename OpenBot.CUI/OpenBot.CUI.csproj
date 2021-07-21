@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net5.0</TargetFramework>
+        <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
+        
+    </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Maila.Cocoa.Framework" Version="2.0.0" />
+      <PackageReference Include="System.CommandLine" Version="2.0.0-beta1.21308.1" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Remove="config\mirai-http.json" />
+        
+    </ItemGroup>
+
+    <ItemGroup>
+      <Content Include="config\mirai-http.json" />
+    </ItemGroup>
+
+    <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+      <Exec Command="xcopy /S/E/R/Y/C/D $(ProjectDir)config $(ProjectDir)$(OutDir)config\" />
+    </Target>
+</Project>
