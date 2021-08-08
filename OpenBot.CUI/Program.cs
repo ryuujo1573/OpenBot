@@ -2,8 +2,11 @@
 using System.Collections.Generic;
 using System.CommandLine.Parsing;
 using System.IO;
+using System.Linq;
 using Maila.Cocoa.Framework;
+using Maila.Cocoa.Framework.Core;
 using Newtonsoft.Json;
+using OpenBot.CsOrg;
 using OpenBot.CUI;
 
 Directory.CreateDirectory("config");
@@ -26,10 +29,17 @@ BotStartupConfig config = new(json["AuthKey"],
         ? (int)port
         : 8080);
 
+config.AddAssembly(typeof(BotBot).Assembly);
+config.AddMiddleware<Blacklist>();
+
 var succeed = await BotStartup.Connect(config);
-if (succeed) // 如果连接成功
+if (succeed)
 {
     Console.WriteLine("Startup OK"); // 提示连接成功
+    Console.WriteLine($@"Loaded Modules: 
+{ModuleCore.Modules
+        .Select(mod => mod.Name)
+        .Aggregate((a, b) => $"{a}, {b}")}");
     while (true)
     {
         var retCode = await Commands.Parser.InvokeAsync(Console.ReadLine() ?? string.Empty);

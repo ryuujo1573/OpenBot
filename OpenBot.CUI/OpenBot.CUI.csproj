@@ -8,7 +8,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="Maila.Cocoa.Framework" Version="2.0.0" />
+      <PackageReference Include="Maila.Cocoa.Framework" Version="2.1.2.1" />
       <PackageReference Include="System.CommandLine" Version="2.0.0-beta1.21308.1" />
     </ItemGroup>
 
@@ -19,6 +19,10 @@
 
     <ItemGroup>
       <Content Include="config\mirai-http.json" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\OpenBot.CsOrg\OpenBot.CsOrg.csproj" />
     </ItemGroup>
 
     <Target Name="PostBuild" AfterTargets="PostBuildEvent">

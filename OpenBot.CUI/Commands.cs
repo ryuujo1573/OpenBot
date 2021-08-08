@@ -19,6 +19,11 @@ namespace OpenBot.CUI
             {
                 exit
             };
+
+            var permCommand = new Command("perm")
+            {
+                new Option(new string[]{"--add", "-a"})
+            };
             
             Parser = new CommandLineBuilder(rootCommand)
                 .UseDefaults()
