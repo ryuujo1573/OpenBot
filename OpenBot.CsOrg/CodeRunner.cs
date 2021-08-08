@@ -2,24 +2,81 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
+using System.Net;
 using System.Runtime.CompilerServices;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
-using System.Timers;
+using Docker.DotNet;
+using Docker.DotNet.Models;
+using Docker.DotNet.X509;
 using Maila.Cocoa.Beans.Models;
+using Maila.Cocoa.Beans.Models.Messages;
 using Maila.Cocoa.Framework;
 using Maila.Cocoa.Framework.Models;
 using Maila.Cocoa.Framework.Models.Processing;
+using Maila.Cocoa.Framework.Support;
+using Timer = System.Timers.Timer;
+
 // ReSharper disable UnusedType.Global
+// ReSharper disable UnusedMember.Global
 
 namespace OpenBot.CsOrg
 {
     [BotModule(nameof(CodeRunner))]
     public class CodeRunner : BotModuleBase
     {
+        [RegexRoute("test docker")]
+        public static void DockerTestSync(MessageSource src)
+        {
+            Console.WriteLine("hello docker sync test!");
+
+            DockerTest(src);
+            
+            Task.Run(async () =>
+            {
+                var sb = new StringBuilder();
+                var credential =
+                    new CertificateCredentials(new X509Certificate2("key.pfx",
+                        await File.ReadAllTextAsync("key-passwd.txt")));
+                var client = new DockerClientConfiguration(new Uri("https://bj01.ryuujo.com:2376"), credential)
+                    .CreateClient(); //todo: do this with configuration
+
+                await client.Containers.StartContainerAsync("hello-world", new ContainerStartParameters(),
+                    CancellationToken.None);
+                await client.Containers.GetContainerLogsAsync("hello-world", new ContainerLogsParameters(),
+                    CancellationToken.None, new Progress<string>(@string => sb.AppendLine(@string)));
+                await src.SendAsync(sb.ToString());
+                await BotAPI.SendFriendMessage(1014469764, new PlainMessage(sb.ToString()));
+            });
+            Console.WriteLine("goodbye docker sync test!");
+        }
         
+        // [ThreadSafe]
+        [RegexRoute("atest docker")]
+        public static async Task DockerTest(MessageSource src)
+        {
+            throw new NotImplementedException("真的");
+            Console.WriteLine("hello docker!");
+            var sb = new StringBuilder();
+            var credential =
+                new CertificateCredentials(new X509Certificate2("key.pfx",
+                    await File.ReadAllTextAsync("key-passwd.txt")));
+            var client = new DockerClientConfiguration(new Uri("https://bj01.ryuujo.com:2376"), credential)
+                .CreateClient(); //todo: do this with configuration
+
+            await client.Containers.StartContainerAsync("hello-world", new ContainerStartParameters(),
+                CancellationToken.None);
+            await client.Containers.GetContainerLogsAsync("hello-world", new ContainerLogsParameters(),
+                CancellationToken.None, new Progress<string>(@string => sb.AppendLine(@string)));
+            await src.SendAsync(sb.ToString());
+        }
+
+
         [RegexRoute(@"^/?run (?<lang>\w+)\s(?<code>[\s\S]*)")]
         public static int RunCode(string lang, string code)
         {
@@ -28,7 +85,7 @@ namespace OpenBot.CsOrg
             {
                 case "python":
                 case "py":
-
+                    // RunPython();
                     break;
                 case "csharp":
                 case "c#":
@@ -39,6 +96,19 @@ namespace OpenBot.CsOrg
 
             return 0;
         }
+
+        // private static int RunPython()
+        // {
+        //     var proc = new Process()
+        //     {
+        //         StartInfo = new ProcessStartInfo
+        //         {
+        //             CreateNoWindow = true,
+        //             FileName = "python"
+        //         }
+        //     };
+        //     
+        // }
 
         [RegexRoute(@"^(@(?<wd>[\S]+))?>\s?(?<line>[\s\S]*)")]
         [IdentityRequirements(UserIdentity.Admin)]

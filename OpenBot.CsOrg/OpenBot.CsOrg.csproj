@@ -5,7 +5,18 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="Maila.Cocoa.Framework" Version="2.1.2.1" />
+      <PackageReference Include="Docker.DotNet" Version="3.125.4" />
+      <PackageReference Include="Docker.DotNet.X509" Version="3.125.2" />
+      <PackageReference Include="Maila.Cocoa.Framework" Version="2.1.3.1" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Update="key.pfx">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+      <None Update="key-passwd.txt">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
     </ItemGroup>
 
 </Project>
